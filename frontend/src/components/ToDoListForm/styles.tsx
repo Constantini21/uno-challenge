@@ -10,7 +10,7 @@ export const Container = styled.div`
   padding: 60px;
   width: 100%;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 10px;
 `
 
 export const Title = styled.div`
@@ -43,8 +43,8 @@ export const ContainerListItem = styled.div`
   background-color: #efefef;
   padding: 10px;
   border-radius: 5px;
-  max-height: 400px; /* Ajuste a altura máxima conforme necessário */
-  overflow: auto; /* Permite rolagem se houver muitos itens */
+  max-height: 400px;
+  overflow: auto;
 `
 
 export const ContainerButton = styled.div`

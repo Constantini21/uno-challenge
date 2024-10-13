@@ -18,13 +18,25 @@ export const resolvers = {
   Mutation: {
     addItem: async (_, { values: { name } }) => {
       await TodoList.create({ name })
+      return true
     },
-    updateItem: (_, { values: { id, name } }) => {
-      // Aqui você irá implementar a edição do item
-      console.log(id, name)
+    updateItem: async (_, { values: { id, name } }) => {
+      if (!id) throw new Error('O "id" é obrigatório.')
+
+      await TodoList.update(
+        { name },
+        {
+          where: {
+            id
+          }
+        }
+      )
+
+      return true
     },
     deleteItem: async (_, { id }) => {
       await TodoList.destroy({ where: { id } })
+      return true
     }
   }
 }

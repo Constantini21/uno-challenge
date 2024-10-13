@@ -1,19 +1,28 @@
 import { useRef, useState } from 'react'
-import { FaTrashAlt, FaEdit, FaChevronDown } from 'react-icons/fa'
+import { FaTrashAlt, FaEdit, FaChevronDown, FaSearch, FaSave } from 'react-icons/fa'
 import { useMutation, useQuery } from '@apollo/client'
 import { getOperationName } from '@apollo/client/utilities'
 
-import { ADD_ITEM_MUTATION, DELETE_ITEM_MUTATION, GET_TODO_LIST } from '../../queries'
-import * as Styles from './styles'
+import {
+  ADD_ITEM_MUTATION,
+  UPDATE_ITEM_MUTATION,
+  DELETE_ITEM_MUTATION,
+  GET_TODO_LIST
+} from '../../queries'
 
+import * as Styles from './styles'
 import Modal from '../Modal'
 
 export default function ToDoListForm() {
   const toDoInputRef = useRef<HTMLInputElement>(null)
+  const updateToDoInputRef = useRef<HTMLInputElement>(null)
+
   const [editingItem, setEditingItem] = useState<{ id: number; name: string } | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<{ id: number; name: string } | null>(null)
   const { data, fetchMore } = useQuery<{ todoList: { id: number; name: string }[] }>(GET_TODO_LIST)
 
   const [addItem] = useMutation(ADD_ITEM_MUTATION)
+  const [updateItem] = useMutation(UPDATE_ITEM_MUTATION)
   const [deleteItem] = useMutation(DELETE_ITEM_MUTATION)
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -21,16 +30,16 @@ export default function ToDoListForm() {
 
     const target = event.nativeEvent as SubmitEvent
     const button = target.submitter as HTMLButtonElement
-    const action = button.getAttribute('data-action')
+    const action = button.getAttribute('data-action') as 'filter' | 'save' | 'edit'
 
-    if (toDoInputRef.current?.value) {
+    if (toDoInputRef.current?.value && ['filter', 'save'].includes(action)) {
       if (action === 'filter') {
         await onFilter()
       } else if (action === 'save') {
         await addItem({
           variables: {
             values: {
-              name: toDoInputRef.current.value
+              name: toDoInputRef.current?.value
             }
           },
           awaitRefetchQueries: true,
@@ -38,27 +47,43 @@ export default function ToDoListForm() {
         })
 
         toDoInputRef.current.value = ''
-      } else if (action === 'edit') {
-        setEditingItem(null)
       }
+    }
+
+    if (action === 'edit' && updateToDoInputRef.current?.value) {
+      await updateItem({
+        variables: {
+          values: {
+            id: editingItem?.id,
+            name: updateToDoInputRef!.current.value
+          }
+        },
+        awaitRefetchQueries: true,
+        refetchQueries: [getOperationName(GET_TODO_LIST) as string]
+      })
+
+      updateToDoInputRef.current.value = ''
+      setEditingItem(null)
     }
   }
 
-  const onDelete = async (id: number) => {
-    await deleteItem({
-      variables: {
-        id
-      },
-      awaitRefetchQueries: true,
-      refetchQueries: [getOperationName(GET_TODO_LIST) as string]
-    })
+  const confirmDelete = async () => {
+    if (itemToDelete) {
+      await deleteItem({
+        variables: { id: itemToDelete.id },
+        awaitRefetchQueries: true,
+        refetchQueries: [getOperationName(GET_TODO_LIST) as string]
+      })
+      setItemToDelete(null)
+    }
+  }
+
+  const onDelete = (item: { id: number; name: string }) => {
+    setItemToDelete(item)
   }
 
   const onUpdate = (item: { id: number; name: string }) => {
     setEditingItem(item)
-    if (toDoInputRef.current) {
-      toDoInputRef.current.value = item.name
-    }
   }
 
   const onFilter = async () => {
@@ -95,25 +120,25 @@ export default function ToDoListForm() {
             id='item'
             type='text'
             placeholder='Digite aqui'
-            className='border-b-2 p-2 outline-none'
+            className='border-b-2 p-2 outline-none rounded'
           />
 
           <div className='flex space-x-2'>
             <button
               onClick={onFilter}
-              className='bg-blue-500 text-white py-2 px-4 rounded w-full'
+              className='bg-blue-500 text-white py-2 px-4 rounded w-full flex items-center justify-center'
               type='submit'
               data-action='filter'
             >
-              Filtrar
+              <FaSearch className='mr-2' /> Filtrar
             </button>
 
             <button
-              className='bg-green-500 text-white py-2 px-4 rounded w-full'
+              className='bg-green-500 text-white py-2 px-4 rounded w-full flex items-center justify-center'
               type='submit'
               data-action='save'
             >
-              Salvar
+              <FaSave className='mr-2' /> Salvar
             </button>
           </div>
         </Styles.ContainerTop>
@@ -133,7 +158,7 @@ export default function ToDoListForm() {
                       className='cursor-pointer text-blue-500'
                     />
                     <FaTrashAlt
-                      onClick={() => onDelete(value.id)}
+                      onClick={() => onDelete(value)}
                       className='cursor-pointer text-red-500'
                     />
                   </div>
@@ -143,7 +168,7 @@ export default function ToDoListForm() {
           </Styles.ContainerListItem>
         )}
 
-        {!!data && data.todoList.length > 5 && (
+        {!!data && data.todoList.length > 6 && (
           <div className='flex justify-center items-center mt-2'>
             <FaChevronDown className='text-gray-500 animate-bounce' />
           </div>
@@ -156,7 +181,7 @@ export default function ToDoListForm() {
             <h2 className='text-lg font-semibold'>Editar Item</h2>
             <form onSubmit={onSubmit}>
               <input
-                ref={toDoInputRef}
+                ref={updateToDoInputRef}
                 type='text'
                 defaultValue={editingItem.name}
                 className='border-b-2 p-2 outline-none'
@@ -179,6 +204,32 @@ export default function ToDoListForm() {
                 </button>
               </div>
             </form>
+          </>
+        )}
+      </Modal>
+
+      <Modal openned={!!itemToDelete}>
+        {!!itemToDelete && (
+          <>
+            <h2 className='text-lg font-semibold'>Confirmar Exclusão</h2>
+            <p>Tem certeza de que deseja excluir "{itemToDelete.name}"?</p>
+            <div className='flex space-x-3 mt-4'>
+              <button
+                type='button'
+                className='bg-red-500 text-white py-2 px-4 rounded'
+                onClick={confirmDelete}
+              >
+                Excluir
+              </button>
+
+              <button
+                type='button'
+                className='bg-gray-500 text-white py-2 px-4 rounded'
+                onClick={() => setItemToDelete(null)}
+              >
+                Cancelar
+              </button>
+            </div>
           </>
         )}
       </Modal>

@@ -6,7 +6,6 @@ import { sequelize } from './db/db.config.mjs'
 import { resolvers } from './graphql/resolvers.mjs'
 import { typeDefs } from './graphql/typeDefs.mjs'
 
-// Configuração para subir o backend
 const startServer = async () => {
   await sequelize.sync()
   const server = new ApolloServer({
@@ -18,7 +17,7 @@ const startServer = async () => {
     listen: { port: 4000 }
   })
 
-  console.log(`🚀  Server ready at: ${url}`)
+  console.info(`Server ready at: ${url} 🚀 `)
 }
 
 startServer()
