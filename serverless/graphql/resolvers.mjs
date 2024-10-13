@@ -20,17 +20,14 @@ export const resolvers = {
       await TodoList.create({ name })
       return true
     },
-    updateItem: async (_, { values: { id, name } }) => {
+    updateItem: async (_, { values: { id, ...rest } }) => {
       if (!id) throw new Error('O "id" é obrigatório.')
 
-      await TodoList.update(
-        { name },
-        {
-          where: {
-            id
-          }
+      await TodoList.update(rest, {
+        where: {
+          id
         }
-      )
+      })
 
       return true
     },

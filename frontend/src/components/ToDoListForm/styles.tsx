@@ -14,6 +14,11 @@ export const Container = styled.div`
 `
 
 export const Title = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 5px;
   font-weight: bold;
   font-size: 28px;
 `

@@ -2,11 +2,13 @@ export const typeDefs = `#graphql
   type Item {
     id: Int
     name: String
+    done: Int
   }
 
   input ItemInput {
     id: Int
     name: String
+    done: Int
   }
 
   input ItemFilter {

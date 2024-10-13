@@ -13,7 +13,11 @@ TodoList.init(
       autoIncrement: true,
       primaryKey: true
     },
-    name: DataTypes.STRING
+    name: DataTypes.STRING,
+    done: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0
+    }
   },
   { sequelize, modelName: 'todo_list' }
 )

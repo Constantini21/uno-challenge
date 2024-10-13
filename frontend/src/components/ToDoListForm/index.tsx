@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { FaTrashAlt, FaEdit, FaChevronDown, FaSearch, FaSave } from 'react-icons/fa'
+import { FcTodoList } from 'react-icons/fc'
 import { useMutation, useQuery } from '@apollo/client'
 import { getOperationName } from '@apollo/client/utilities'
 
@@ -13,13 +14,15 @@ import {
 import * as Styles from './styles'
 import Modal from '../Modal'
 
+type Item = { id: number; name: string; done: number }
+
 export default function ToDoListForm() {
   const toDoInputRef = useRef<HTMLInputElement>(null)
   const updateToDoInputRef = useRef<HTMLInputElement>(null)
 
-  const [editingItem, setEditingItem] = useState<{ id: number; name: string } | null>(null)
-  const [itemToDelete, setItemToDelete] = useState<{ id: number; name: string } | null>(null)
-  const { data, fetchMore } = useQuery<{ todoList: { id: number; name: string }[] }>(GET_TODO_LIST)
+  const [editingItem, setEditingItem] = useState<Item | null>(null)
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null)
+  const { data, fetchMore } = useQuery<{ todoList: Item[] }>(GET_TODO_LIST)
 
   const [addItem] = useMutation(ADD_ITEM_MUTATION)
   const [updateItem] = useMutation(UPDATE_ITEM_MUTATION)
@@ -76,11 +79,11 @@ export default function ToDoListForm() {
     }
   }
 
-  const onDelete = (item: { id: number; name: string }) => {
+  const onDelete = (item: Item) => {
     setItemToDelete(item)
   }
 
-  const onUpdate = (item: { id: number; name: string }) => {
+  const onUpdate = (item: Item) => {
     setEditingItem(item)
   }
 
@@ -102,9 +105,25 @@ export default function ToDoListForm() {
     }
   }
 
+  const toggleCompletion = async (item: Item) => {
+    await updateItem({
+      variables: {
+        values: {
+          id: item.id,
+          done: !!item.done ? 0 : 1
+        }
+      },
+      awaitRefetchQueries: true,
+      refetchQueries: [getOperationName(GET_TODO_LIST) as string]
+    })
+  }
+
   return (
     <Styles.Container>
-      <Styles.Title>TODO LIST</Styles.Title>
+      <Styles.Title>
+        <FcTodoList size={30} />
+        To Do List
+      </Styles.Title>
 
       <Styles.ContainerList>
         <Styles.ContainerTop onSubmit={onSubmit}>
@@ -149,7 +168,17 @@ export default function ToDoListForm() {
                   key={value.id}
                   className='flex justify-between items-center p-2 mt-2 mb-2 rounded border border-gray-200'
                 >
-                  <span>{value?.name}</span>
+                  <input
+                    type='checkbox'
+                    checked={!!value.done}
+                    onChange={() => toggleCompletion(value)}
+                    className='mr-2'
+                  />
+                  <span
+                    className={`flex-1 text-lg ${!!value.done ? 'line-through' : ''} text-center`}
+                  >
+                    {value?.name}
+                  </span>
                   <div className='flex space-x-4'>
                     <FaEdit
                       onClick={() => onUpdate(value)}
