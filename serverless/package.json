@@ -2,13 +2,17 @@
   "name": "uno-challenge",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.mjs"
   },
   "dependencies": {
     "@apollo/server": "^4.7.4",
+    "@sequelize/sqlite3": "^7.0.0-alpha.43",
     "graphql": "^16.6.0",
     "moment": "^2.29.1",
-    "moment-timezone": "^0.5.33"
+    "moment-timezone": "^0.5.33",
+    "sequelize": "^6.37.4",
+    "sqlite3": "^5.1.7"
   }
 }
