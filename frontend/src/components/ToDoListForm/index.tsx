@@ -48,14 +48,12 @@ export default function ToDoListForm() {
 
         toDoInputRef.current.value = ''
       }
-    }
-
-    if (action === 'edit' && updateToDoInputRef.current?.value) {
+    } else if (action === 'edit' && updateToDoInputRef.current?.value) {
       await updateItem({
         variables: {
           values: {
             id: editingItem?.id,
-            name: updateToDoInputRef!.current.value
+            name: updateToDoInputRef.current.value
           }
         },
         awaitRefetchQueries: true,
@@ -175,7 +173,7 @@ export default function ToDoListForm() {
         )}
       </Styles.ContainerList>
 
-      <Modal openned={!!editingItem}>
+      <Modal openned={!!editingItem} onClose={closeEditModal}>
         {!!editingItem && (
           <>
             <h2 className='text-lg font-semibold'>Editar Item</h2>
@@ -208,7 +206,7 @@ export default function ToDoListForm() {
         )}
       </Modal>
 
-      <Modal openned={!!itemToDelete}>
+      <Modal openned={!!itemToDelete} onClose={() => setItemToDelete(null)}>
         {!!itemToDelete && (
           <>
             <h2 className='text-lg font-semibold'>Confirmar Exclusão</h2>
