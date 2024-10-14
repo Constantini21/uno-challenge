@@ -5,6 +5,7 @@ import 'animate.css/animate.min.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client'
+import { cssTransition, ToastContainer } from 'react-toastify'
 
 import App from './App.tsx'
 
@@ -13,9 +14,16 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 })
 
+const Bounce = cssTransition({
+  enter: 'animate__animated animate__bounceIn',
+  exit: 'animate__animated animate__bounceOut'
+})
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ApolloProvider client={client}>
+      <ToastContainer transition={Bounce} />
+
       <App />
     </ApolloProvider>
   </StrictMode>

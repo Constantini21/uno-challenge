@@ -9,7 +9,7 @@ export const resolvers = {
         ? TodoList.findAll()
         : TodoList.findAll({
             where: {
-              name: { [Op.like]: `%${filter.name.toLowerCase()}%` }
+              name: { [Op.like]: `%${filter.name.trim().toLowerCase()}%` }
             }
           })
     }

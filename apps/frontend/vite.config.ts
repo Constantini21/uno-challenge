@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    server: { port: 3000 },
     define: {
       REACT_APP_GRAPHQL_URI: JSON.stringify(env.REACT_APP_GRAPHQL_URI)
     }
