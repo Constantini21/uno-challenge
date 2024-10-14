@@ -1,4 +1,6 @@
 import './index.css'
+import 'react-toastify/dist/ReactToastify.css'
+import 'animate.css/animate.min.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

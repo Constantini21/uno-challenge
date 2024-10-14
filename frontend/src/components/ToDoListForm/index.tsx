@@ -3,6 +3,7 @@ import { FaTrashAlt, FaEdit, FaChevronDown, FaSearch, FaSave } from 'react-icons
 import { FcTodoList } from 'react-icons/fc'
 import { useMutation, useQuery } from '@apollo/client'
 import { getOperationName } from '@apollo/client/utilities'
+import { ToastContainer, toast, cssTransition } from 'react-toastify'
 
 import {
   ADD_ITEM_MUTATION,
@@ -15,6 +16,11 @@ import * as Styles from './styles'
 import Modal from '../Modal'
 
 type Item = { id: number; name: string; done: number }
+
+const Bounce = cssTransition({
+  enter: 'animate__animated animate__bounceIn',
+  exit: 'animate__animated animate__bounceOut'
+})
 
 export default function ToDoListForm() {
   const toDoInputRef = useRef<HTMLInputElement>(null)
@@ -50,6 +56,17 @@ export default function ToDoListForm() {
         })
 
         toDoInputRef.current.value = ''
+        toast.success('Item adicionado com sucesso!', {
+          position: 'top-right',
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'dark',
+          transition: Bounce
+        })
       }
     } else if (action === 'edit' && updateToDoInputRef.current?.value) {
       await updateItem({
@@ -65,6 +82,18 @@ export default function ToDoListForm() {
 
       updateToDoInputRef.current.value = ''
       setEditingItem(null)
+
+      toast.success('Item atualizado com sucesso!', {
+        position: 'top-right',
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce
+      })
     }
   }
 
@@ -119,147 +148,151 @@ export default function ToDoListForm() {
   }
 
   return (
-    <Styles.Container>
-      <Styles.Title>
-        <FcTodoList size={30} />
-        To Do List
-      </Styles.Title>
+    <>
+      <ToastContainer transition={Bounce} />
 
-      <Styles.ContainerList>
-        <Styles.ContainerTop onSubmit={onSubmit}>
-          <input
-            ref={toDoInputRef}
-            onChange={async event => {
-              if (!event.target.value) {
-                await onFilter()
-              }
-            }}
-            id='item'
-            type='text'
-            placeholder='Digite aqui'
-            className='border-b-2 p-2 outline-none rounded'
-          />
+      <Styles.Container>
+        <Styles.Title>
+          <FcTodoList size={30} />
+          To Do List
+        </Styles.Title>
 
-          <div className='flex space-x-2'>
-            <button
-              onClick={onFilter}
-              className='bg-blue-500 text-white py-2 px-4 rounded w-full flex items-center justify-center'
-              type='submit'
-              data-action='filter'
-            >
-              <FaSearch className='mr-2' /> Filtrar
-            </button>
+        <Styles.ContainerList>
+          <Styles.ContainerTop onSubmit={onSubmit}>
+            <input
+              ref={toDoInputRef}
+              onChange={async event => {
+                if (!event.target.value) {
+                  await onFilter()
+                }
+              }}
+              id='item'
+              type='text'
+              placeholder='Digite aqui'
+              className='border-b-2 p-2 outline-none rounded'
+            />
 
-            <button
-              className='bg-green-500 text-white py-2 px-4 rounded w-full flex items-center justify-center'
-              type='submit'
-              data-action='save'
-            >
-              <FaSave className='mr-2' /> Salvar
-            </button>
-          </div>
-        </Styles.ContainerTop>
+            <div className='flex space-x-2'>
+              <button
+                onClick={onFilter}
+                className='bg-blue-500 text-white py-2 px-4 rounded w-full flex items-center justify-center'
+                type='submit'
+                data-action='filter'
+              >
+                <FaSearch className='mr-2' /> Filtrar
+              </button>
 
-        {!!data && !!data.todoList.length && (
-          <Styles.ContainerListItem>
-            <div className='flex flex-col'>
-              {data.todoList.map(value => (
-                <li
-                  key={value.id}
-                  className='flex justify-between items-center p-2 mt-2 mb-2 rounded border border-gray-200'
-                >
-                  <input
-                    type='checkbox'
-                    checked={!!value.done}
-                    onChange={() => toggleCompletion(value)}
-                    className='mr-2'
-                  />
-                  <span
-                    className={`flex-1 text-lg ${!!value.done ? 'line-through' : ''} text-center`}
-                  >
-                    {value?.name}
-                  </span>
-                  <div className='flex space-x-4'>
-                    <FaEdit
-                      onClick={() => onUpdate(value)}
-                      className='cursor-pointer text-blue-500'
-                    />
-                    <FaTrashAlt
-                      onClick={() => onDelete(value)}
-                      className='cursor-pointer text-red-500'
-                    />
-                  </div>
-                </li>
-              ))}
+              <button
+                className='bg-green-500 text-white py-2 px-4 rounded w-full flex items-center justify-center'
+                type='submit'
+                data-action='save'
+              >
+                <FaSave className='mr-2' /> Salvar
+              </button>
             </div>
-          </Styles.ContainerListItem>
-        )}
+          </Styles.ContainerTop>
 
-        {!!data && data.todoList.length > 6 && (
-          <div className='flex justify-center items-center mt-2'>
-            <FaChevronDown className='text-gray-500 animate-bounce' />
-          </div>
-        )}
-      </Styles.ContainerList>
+          {!!data && !!data.todoList.length && (
+            <Styles.ContainerListItem>
+              <div className='flex flex-col'>
+                {data.todoList.map(value => (
+                  <li
+                    key={value.id}
+                    className='flex justify-between items-center p-2 mt-2 mb-2 rounded border border-gray-200'
+                  >
+                    <input
+                      type='checkbox'
+                      checked={!!value.done}
+                      onChange={() => toggleCompletion(value)}
+                      className='mr-2'
+                    />
+                    <span
+                      className={`flex-1 text-lg ${!!value.done ? 'line-through' : ''} text-center`}
+                    >
+                      {value?.name}
+                    </span>
+                    <div className='flex space-x-4'>
+                      <FaEdit
+                        onClick={() => onUpdate(value)}
+                        className='cursor-pointer text-blue-500'
+                      />
+                      <FaTrashAlt
+                        onClick={() => onDelete(value)}
+                        className='cursor-pointer text-red-500'
+                      />
+                    </div>
+                  </li>
+                ))}
+              </div>
+            </Styles.ContainerListItem>
+          )}
 
-      <Modal openned={!!editingItem} onClose={closeEditModal}>
-        {!!editingItem && (
-          <>
-            <h2 className='text-lg font-semibold'>Editar Item</h2>
-            <form onSubmit={onSubmit}>
-              <input
-                ref={updateToDoInputRef}
-                type='text'
-                defaultValue={editingItem.name}
-                className='border-b-2 p-2 outline-none'
-              />
+          {!!data && data.todoList.length > 6 && (
+            <div className='flex justify-center items-center mt-2'>
+              <FaChevronDown className='text-gray-500 animate-bounce' />
+            </div>
+          )}
+        </Styles.ContainerList>
+
+        <Modal openned={!!editingItem} onClose={closeEditModal}>
+          {!!editingItem && (
+            <>
+              <h2 className='text-lg font-semibold'>Editar Item</h2>
+              <form onSubmit={onSubmit}>
+                <input
+                  ref={updateToDoInputRef}
+                  type='text'
+                  defaultValue={editingItem.name}
+                  className='border-b-2 p-2 outline-none'
+                />
+                <div className='flex space-x-3 mt-4'>
+                  <button
+                    type='submit'
+                    className='bg-green-500 text-white py-2 px-4 rounded'
+                    data-action='edit'
+                  >
+                    Salvar
+                  </button>
+
+                  <button
+                    type='button'
+                    className='bg-red-500 text-white py-2 px-4 rounded'
+                    onClick={closeEditModal}
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </Modal>
+
+        <Modal openned={!!itemToDelete} onClose={() => setItemToDelete(null)}>
+          {!!itemToDelete && (
+            <>
+              <h2 className='text-lg font-semibold'>Confirmar Exclusão</h2>
+              <p>Tem certeza de que deseja excluir "{itemToDelete.name}"?</p>
               <div className='flex space-x-3 mt-4'>
                 <button
-                  type='submit'
-                  className='bg-green-500 text-white py-2 px-4 rounded'
-                  data-action='edit'
+                  type='button'
+                  className='bg-red-500 text-white py-2 px-4 rounded'
+                  onClick={confirmDelete}
                 >
-                  Salvar
+                  Excluir
                 </button>
 
                 <button
                   type='button'
-                  className='bg-red-500 text-white py-2 px-4 rounded'
-                  onClick={closeEditModal}
+                  className='bg-gray-500 text-white py-2 px-4 rounded'
+                  onClick={() => setItemToDelete(null)}
                 >
-                  Fechar
+                  Cancelar
                 </button>
               </div>
-            </form>
-          </>
-        )}
-      </Modal>
-
-      <Modal openned={!!itemToDelete} onClose={() => setItemToDelete(null)}>
-        {!!itemToDelete && (
-          <>
-            <h2 className='text-lg font-semibold'>Confirmar Exclusão</h2>
-            <p>Tem certeza de que deseja excluir "{itemToDelete.name}"?</p>
-            <div className='flex space-x-3 mt-4'>
-              <button
-                type='button'
-                className='bg-red-500 text-white py-2 px-4 rounded'
-                onClick={confirmDelete}
-              >
-                Excluir
-              </button>
-
-              <button
-                type='button'
-                className='bg-gray-500 text-white py-2 px-4 rounded'
-                onClick={() => setItemToDelete(null)}
-              >
-                Cancelar
-              </button>
-            </div>
-          </>
-        )}
-      </Modal>
-    </Styles.Container>
+            </>
+          )}
+        </Modal>
+      </Styles.Container>
+    </>
   )
 }

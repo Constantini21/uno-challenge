@@ -17,7 +17,7 @@ const startServer = async () => {
     listen: { port: 4000 }
   })
 
-  console.info(`Server ready at: ${url} 🚀 `)
+  console.info(`Server ready at: ${url} 🚀`)
 }
 
 startServer()

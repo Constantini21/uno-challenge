@@ -4,11 +4,9 @@ import ToDoListForm from './components/ToDoListForm'
 
 function App() {
   return (
-    <>
-      <div className='app-container'>
-        <ToDoListForm />
-      </div>
-    </>
+    <div className='app-container'>
+      <ToDoListForm />
+    </div>
   )
 }
 
